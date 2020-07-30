@@ -1,13 +1,13 @@
 {
   "name": "@type-challenges/octokit-create-pull-request",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Octokit plugin to create a pull request with multiple file changes",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsup ./src/index.ts --format esm,cjs --dts",
-    "release": "pnpx bumpp --tag --commit --patch && pnpm build && pnpm publish -y"
+    "release": "pnpx bumpp patch --tag --commit && pnpm build && pnpm publish -y"
   },
   "author": "Gregor Martynus (https://github.com/gr2m)",
   "license": "MIT",
