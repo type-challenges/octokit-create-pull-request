@@ -1,6 +1,6 @@
 {
   "name": "@type-challenges/octokit-create-pull-request",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Octokit plugin to create a pull request with multiple file changes",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
