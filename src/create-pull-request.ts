@@ -100,7 +100,7 @@ export async function PushCommit(
       owner,
       repo,
       sha: state.latestCommitSha!,
-      ref: `refs/heads/${head}`,
+      ref: `heads/${head}`,
       force: true,
     })
   }
