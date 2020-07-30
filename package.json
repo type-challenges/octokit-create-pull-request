@@ -12,12 +12,18 @@
   "author": "Gregor Martynus (https://github.com/gr2m)",
   "license": "MIT",
   "devDependencies": {
+    "@antfu/eslint-config-ts": "^0.2.14",
     "@octokit/core": "^3.1.1",
     "@octokit/plugin-paginate-rest": "^2.3.0",
     "@octokit/types": "^5.2.0",
     "@types/node": "^14.0.27",
+    "@typescript-eslint/eslint-plugin": "^3.7.1",
+    "eslint": "^7.5.0",
     "tsup": "^3.4.2",
     "typescript": "^3.9.7"
   },
-  "repository": "https://github.com/type-challenges/octokit-create-pull-request"
+  "repository": "https://github.com/type-challenges/octokit-create-pull-request",
+  "eslintConfig": {
+    "extends": "@antfu/eslint-config-ts"
+  }
 }

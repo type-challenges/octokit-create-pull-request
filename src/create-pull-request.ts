@@ -1,8 +1,8 @@
-import type { Octokit } from "@octokit/core";
-import type { Changes, PullRequestOptions, State, CommitOptions } from "./types";
+import type { Octokit } from '@octokit/core'
+import type { Changes, PullRequestOptions, State, CommitOptions } from './types'
 
-import { createTree } from "./create-tree";
-import { createCommit } from "./create-commit";
+import { createTree } from './create-tree'
+import { createCommit } from './create-commit'
 
 export async function PushCommit(
   octokit: Octokit,
@@ -13,63 +13,64 @@ export async function PushCommit(
     head,
     createWhenEmpty,
     changes: changesOption,
-  }: CommitOptions
+    fresh,
+  }: CommitOptions,
 ) {
   const changes = Array.isArray(changesOption)
     ? changesOption
-    : [changesOption];
+    : [changesOption]
 
-  if (changes.length === 0)
+  if (changes.length === 0) {
     throw new Error(
-      '[octokit-plugin-create-pull-request] "changes" cannot be an empty array'
-    );
+      '[octokit-plugin-create-pull-request] "changes" cannot be an empty array',
+    )
+  }
 
-  const state: State = { octokit, owner, repo };
+  const state: State = { octokit, owner, repo }
 
   // https://developer.github.com/v3/repos/#get-a-repository
   const { data: repository } = await octokit.request(
-    "GET /repos/:owner/:repo",
+    'GET /repos/:owner/:repo',
     {
       owner,
       repo,
-    }
-  );
+    },
+  )
 
   if (!repository.permissions) {
     throw new Error(
-      "[octokit-plugin-create-pull-request] Missing authentication"
-    );
+      '[octokit-plugin-create-pull-request] Missing authentication',
+    )
   }
 
-  if (!base) {
-    base = repository.default_branch;
-  }
+  if (!base)
+    base = repository.default_branch
 
   // https://developer.github.com/v3/repos/commits/#list-commits-on-a-repository
   const {
     data: [latestCommit],
-  } = await octokit.request("GET /repos/:owner/:repo/commits", {
+  } = await octokit.request('GET /repos/:owner/:repo/commits', {
     owner,
     repo,
     sha: base,
     per_page: 1,
-  });
+  })
 
-  state.latestCommitSha = latestCommit.sha;
-  state.latestCommitTreeSha = latestCommit.commit.tree.sha;
-  const baseCommitTreeSha = latestCommit.commit.tree.sha;
+  state.latestCommitSha = latestCommit.sha
+  state.latestCommitTreeSha = latestCommit.commit.tree.sha
+  const baseCommitTreeSha = latestCommit.commit.tree.sha
 
   for (const change of changes) {
-    let treeCreated = false;
+    let treeCreated = false
     if (change.files && Object.keys(change.files).length) {
       const latestCommitTreeSha = await createTree(
         state as Required<State>,
-        change as Required<Changes>
-      );
+        change as Required<Changes>,
+      )
 
       if (latestCommitTreeSha) {
-        state.latestCommitTreeSha = latestCommitTreeSha;
-        treeCreated = true;
+        state.latestCommitTreeSha = latestCommitTreeSha
+        treeCreated = true
       }
     }
 
@@ -77,28 +78,39 @@ export async function PushCommit(
       state.latestCommitSha = await createCommit(
         state as Required<State>,
         treeCreated,
-        change
-      );
+        change,
+      )
     }
   }
 
-  const hasNoChanges = baseCommitTreeSha === state.latestCommitTreeSha;
-  if (hasNoChanges && createWhenEmpty === false) {
-    return null;
+  const hasNoChanges = baseCommitTreeSha === state.latestCommitTreeSha
+  if (hasNoChanges && createWhenEmpty === false)
+    return null
+
+  if (fresh) {
+    await octokit.git.createRef({
+      owner,
+      repo,
+      sha: state.latestCommitSha!,
+      ref: `refs/heads/${head}`,
+    })
+  }
+  else {
+    await octokit.git.updateRef({
+      owner,
+      repo,
+      sha: state.latestCommitSha!,
+      ref: `refs/heads/${head}`,
+      force: true,
+    })
   }
 
-  // https://developer.github.com/v3/git/refs/#create-a-reference
-  await octokit.request("POST /repos/:owner/:repo/git/refs", {
-    owner,
-    repo,
-    sha: state.latestCommitSha,
-    ref: `refs/heads/${head}`,
-  });
+  return state
 }
 
 export async function CreatePullRequest(
   octokit: Octokit,
-  options: PullRequestOptions
+  options: PullRequestOptions,
 ) {
   const {
     owner,
@@ -110,12 +122,12 @@ export async function CreatePullRequest(
   } = options
 
   // https://developer.github.com/v3/pulls/#create-a-pull-request
-  return await octokit.request("POST /repos/:owner/:repo/pulls", {
+  return await octokit.request('POST /repos/:owner/:repo/pulls', {
     owner,
     repo,
     head: `${owner}:${head}`,
     base,
     title,
     body,
-  });
+  })
 }
