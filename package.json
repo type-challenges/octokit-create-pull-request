@@ -7,7 +7,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsup ./src/index.ts --format esm,cjs --dts",
-    "release": "pnpx bumpp patch --tag --commit && pnpm build && pnpm publish -y"
+    "release": "pnpx bumpp patch --tag --commit && pnpm build && npm publish"
   },
   "author": "Gregor Martynus (https://github.com/gr2m)",
   "license": "MIT",
