@@ -110,17 +110,16 @@ export async function PushCommit(
 
 export async function CreatePullRequest(
   octokit: Octokit,
-  options: PullRequestOptions,
-) {
-  const {
+  {
     owner,
     repo,
     title,
     body,
     base,
     head,
-  } = options
-
+    labels,
+  }: PullRequestOptions,
+) {
   // https://developer.github.com/v3/pulls/#create-a-pull-request
   return await octokit.request('POST /repos/:owner/:repo/pulls', {
     owner,
@@ -129,5 +128,6 @@ export async function CreatePullRequest(
     base,
     title,
     body,
+    labels,
   })
 }

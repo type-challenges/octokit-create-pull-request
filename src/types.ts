@@ -20,6 +20,7 @@ export interface PullRequestOptions {
   repo: string
   head: string
   base: string
+  labels?: string[]
 }
 
 export type Changes = {
