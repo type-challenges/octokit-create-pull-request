@@ -4,19 +4,11 @@
   "description": "Octokit plugin to create a pull request with multiple file changes",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsup ./src/index.ts --format esm,cjs --dts",
-    "lint": "prettier --check '{src,test}/**/*.{ts,md}' *.md package.json tsconfig.json",
-    "lint:fix": "prettier --write '{src,test}/**/*.{ts,md}' *.md package.json tsconfig.json",
-    "pretest": "npm run -s lint",
     "release": "pnpx bumpp --tag --commit && pnpm build && pnpm publish"
   },
-  "keywords": [
-    "github",
-    "octokit",
-    "plugin",
-    "pull-request"
-  ],
   "author": "Gregor Martynus (https://github.com/gr2m)",
   "license": "MIT",
   "devDependencies": {
@@ -24,7 +16,6 @@
     "@octokit/plugin-paginate-rest": "^2.3.0",
     "@octokit/types": "^5.2.0",
     "@types/node": "^14.0.27",
-    "prettier": "^2.0.5",
     "tsup": "^3.4.2",
     "typescript": "^3.9.7"
   },
