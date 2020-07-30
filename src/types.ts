@@ -3,16 +3,23 @@ import type { Endpoints } from "@octokit/types";
 
 export type TreeParameter = Endpoints["POST /repos/:owner/:repo/git/trees"]["parameters"]["tree"];
 
-export type Options = {
+export interface CommitOptions {
   owner: string;
   repo: string;
-  title: string;
-  body: string;
   head: string;
-  base?: string;
+  base: string;
   createWhenEmpty?: boolean;
   changes: Changes | Changes[];
 };
+
+export interface PullRequestOptions {
+  title: string;
+  body: string;
+  owner: string;
+  repo: string;
+  head: string;
+  base: string;
+} 
 
 export type Changes = {
   files?: {
@@ -48,7 +55,6 @@ export type State = {
   octokit: Octokit;
   owner: string;
   repo: string;
-  fork?: string;
   latestCommitSha?: string;
   latestCommitTreeSha?: string;
   treeSha?: string;

@@ -1,21 +1,19 @@
 import type { Octokit } from "@octokit/core";
-import type { Changes, Options, State } from "./types";
+import type { Changes, PullRequestOptions, State, CommitOptions } from "./types";
 
 import { createTree } from "./create-tree";
 import { createCommit } from "./create-commit";
 
-export async function composeCreatePullRequest(
+export async function PushCommit(
   octokit: Octokit,
   {
     owner,
     repo,
-    title,
-    body,
     base,
     head,
     createWhenEmpty,
     changes: changesOption,
-  }: Options
+  }: CommitOptions
 ) {
   const changes = Array.isArray(changesOption)
     ? changesOption
@@ -29,15 +27,13 @@ export async function composeCreatePullRequest(
   const state: State = { octokit, owner, repo };
 
   // https://developer.github.com/v3/repos/#get-a-repository
-  const { data: repository, headers } = await octokit.request(
+  const { data: repository } = await octokit.request(
     "GET /repos/:owner/:repo",
     {
       owner,
       repo,
     }
   );
-
-  const isUser = !!headers["x-oauth-scopes"];
 
   if (!repository.permissions) {
     throw new Error(
@@ -49,32 +45,6 @@ export async function composeCreatePullRequest(
     base = repository.default_branch;
   }
 
-  state.fork = owner;
-
-  if (isUser && !repository.permissions.push) {
-    // https://developer.github.com/v3/users/#get-the-authenticated-user
-    const user = await octokit.request("GET /user");
-
-    // https://developer.github.com/v3/repos/forks/#list-forks
-    const forks = await octokit.request("GET /repos/:owner/:repo/forks", {
-      owner,
-      repo,
-    });
-    const hasFork = forks.data.find(
-      (fork) => fork.owner.login === user.data.login
-    );
-
-    if (!hasFork) {
-      // https://developer.github.com/v3/repos/forks/#create-a-fork
-      await octokit.request("POST /repos/:owner/:repo/forks", {
-        owner,
-        repo,
-      });
-    }
-
-    state.fork = user.data.login;
-  }
-
   // https://developer.github.com/v3/repos/commits/#list-commits-on-a-repository
   const {
     data: [latestCommit],
@@ -84,6 +54,7 @@ export async function composeCreatePullRequest(
     sha: base,
     per_page: 1,
   });
+
   state.latestCommitSha = latestCommit.sha;
   state.latestCommitTreeSha = latestCommit.commit.tree.sha;
   const baseCommitTreeSha = latestCommit.commit.tree.sha;
@@ -118,17 +89,31 @@ export async function composeCreatePullRequest(
 
   // https://developer.github.com/v3/git/refs/#create-a-reference
   await octokit.request("POST /repos/:owner/:repo/git/refs", {
-    owner: state.fork,
+    owner,
     repo,
     sha: state.latestCommitSha,
     ref: `refs/heads/${head}`,
   });
+}
+
+export async function CreatePullRequest(
+  octokit: Octokit,
+  options: PullRequestOptions
+) {
+  const {
+    owner,
+    repo,
+    title,
+    body,
+    base,
+    head,
+  } = options
 
   // https://developer.github.com/v3/pulls/#create-a-pull-request
   return await octokit.request("POST /repos/:owner/:repo/pulls", {
     owner,
     repo,
-    head: `${state.fork}:${head}`,
+    head: `${owner}:${head}`,
     base,
     title,
     body,
