@@ -29,6 +29,10 @@ export type Changes = {
   }
   emptyCommit?: boolean | string
   commit: string
+  author?: {
+    name?: string
+    email?: string
+  }
 }
 
 // https://developer.github.com/v3/git/blobs/#parameters

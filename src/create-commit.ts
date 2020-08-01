@@ -22,6 +22,7 @@ export async function createCommit(
       message,
       tree: state.latestCommitTreeSha,
       parents: [latestCommitSha],
+      author: changes.author,
     },
   )
 
